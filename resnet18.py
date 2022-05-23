@@ -168,6 +168,8 @@ tracker = model.fit(X_train, y_train,
 
 
 # 保存模型
+if not os.path.exists("app"):
+    os.mkdir("app")
 model.save("./app/resnet18.h5")
 
 # 读取模型

@@ -1,0 +1,9 @@
+Image==1.5.33
+numpy==1.21.5
+opencv_python==4.5.5.64
+pandas==1.4.2
+Pillow==9.1.1
+pytesseract==0.3.9
+requests==2.27.1
+scikit_learn==1.1.1
+tensorflow==2.6.0
