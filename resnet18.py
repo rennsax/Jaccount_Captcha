@@ -47,14 +47,17 @@ X_train = X_train/255
 X_validate = X_validate/255
 X_test = X_test/255
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
 
 # 18层
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 class BasicBlock(layers.Layer):
 
     def __init__(self, out_channel, strides=1, downsample=None, **kwargs):
         super(BasicBlock, self).__init__(**kwargs)
+        self.out_channel = out_channel
+        self.strides = strides
+        self.downsample = downsample
+
         self.conv1 = layers.Conv2D(out_channel, kernel_size=3, strides=strides,
                                    padding="SAME", use_bias=False)
         # Batch Normalization,加快模型训练时的收敛速度，使得模型训练过程更加稳定，
@@ -87,21 +90,31 @@ class BasicBlock(layers.Layer):
 
         return x
 
+    def get_config(self):
+
+        config = super().get_config().copy()
+        config.update({
+            'out_channel': self.out_channel,
+            'strides': self.strides,
+            'downsample': self.downsample,
+        })
+        return config
+
 
 def _make_layer(block, channel, block_num, name, strides=1):
     downsample = None
     if strides != 1:
         downsample = Sequential([
             layers.Conv2D(channel, kernel_size=1, strides=strides,
-                          use_bias=False, name="conv1"),
-            layers.BatchNormalization(momentum=0.9, epsilon=1.001e-5, name="BatchNorm")
-        ], name="shortcut")
+                          use_bias=False, name=name + "conv1"),
+            layers.BatchNormalization(momentum=0.9, epsilon=1.001e-5, name=name + "BatchNorm")
+        ], name=name + "shortcut")
 
     layers_list = []
-    layers_list.append(block(channel, downsample=downsample, strides=strides, name="unit_1"))
+    layers_list.append(block(channel, downsample=downsample, strides=strides, name=name + "unit_1"))
 
     for index in range(1, block_num):
-        layers_list.append(block(channel, name="unit_" + str(index + 1)))
+        layers_list.append(block(channel, name=name + "unit_" + str(index + 1)))
 
     return Sequential(layers_list, name=name)
 
@@ -152,6 +165,14 @@ tracker = model.fit(X_train, y_train,
                     epochs=epochs,
                     validation_data=(X_validate, y_validate),
                     verbose=1)
+
+
+# 保存模型
+model.save("./app/resnet18.h5")
+
+# 读取模型
+# model = tf.keras.models.load_model("./app/resnet18.h5",\
+#                     custom_objects={"BasicBlock": BasicBlock})
 
 tracker.history['accuracy']
 

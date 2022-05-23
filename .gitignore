@@ -8,3 +8,4 @@ pic.csv
 *.ipynb
 test_image.png
 classify.md
+app/
