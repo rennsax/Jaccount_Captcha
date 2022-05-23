@@ -1,0 +1,10 @@
+original_pic/
+smoothed/
+divided/
+classify/
+pic/
+result/
+pic.csv
+*.ipynb
+test_image.png
+classify.md
